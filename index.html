@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contact Form</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 0 15px; }
+  label { display: block; margin-top: 15px; }
+  input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+  button { margin-top: 20px; padding: 10px 15px; }
+  .message { margin-top: 15px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Contact Us</h1>
+
+<form id="contact-form" action="https://yourdomain.com/submit" method="POST">
+  <label for="name">Name *</label>
+  <input id="name" name="name" type="text" required />
+
+  <label for="email">Email *</label>
+  <input id="email" name="email" type="email" required />
+
+  <label for="subject">Subject</label>
+  <input id="subject" name="subject" type="text" />
+
+  <label for="message">Message *</label>
+  <textarea id="message" name="message" rows="5" required></textarea>
+
+  <input type="hidden" name="source" value="vercel-static-site" />
+
+  <button type="submit">Send</button>
+</form>
+
+<div class="message" id="form-message"></div>
+
+<script>
+  const form = document.getElementById('contact-form');
+  const messageBox = document.getElementById('form-message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageBox.textContent = '';
+    messageBox.style.color = '';
+
+    const data = {
+      name: form.name.value.trim(),
+      email: form.email.value.trim(),
+      subject: form.subject.value.trim(),
+      message: form.message.value.trim(),
+      source: 'vercel-static-site'
+    };
+
+    if (!data.name || !data.email || !data.message) {
+      messageBox.textContent = 'Please fill out required fields.';
+      messageBox.style.color = 'red';
+      return;
+    }
+
+    try {
+      const response = await fetch('http://webcites.net/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        messageBox.textContent = result.message || 'Message sent successfully!';
+        messageBox.style.color = 'green';
+        form.reset();
+      } else {
+        throw new Error(result.message || 'Failed to send message.');
+      }
+    } catch (err) {
+      console.error(err);
+      messageBox.textContent = 'Error sending message. Please try again later.';
+      messageBox.style.color = 'red';
+    }
+  });
+</script>
+
+</body>
+</html>
